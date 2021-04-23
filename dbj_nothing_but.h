@@ -114,11 +114,13 @@ namespace dbj {
 			// as elsewhere in std 
 			// the convention is to provide 'data()' method
 			T const& data() const &  { return val_; }
-			T const& data() const && { return val_; }
+			// can not get data from temporary 
+			T const& data() const && = delete ;
 			// for users to reach to non const data handled
 			// ref. qualified since 0.6.0
 			T& data() &  { return (T&)val_; }
-			T& data() && { return (T&)val_; }
+			// can not get data from temporary 
+			T& data() && = delete ;
 
 
 		private:
