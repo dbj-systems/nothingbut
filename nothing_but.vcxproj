@@ -177,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dbj_nothing_but.h" />
+    <ClInclude Include="epiphany.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CHANGELOG.md" />
