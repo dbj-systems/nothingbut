@@ -82,12 +82,18 @@ namespace dbj {
 			// to convert or assign from T is allowed
 			// to move from T is allowed
 			nothing_but(T&& t_) noexcept : val_(std::move(t_)) { }
-			type& operator = (T&& new_val_) noexcept { val_ = std::move(new_val_); return *this; }
+			type& operator = (T&& new_val_) & noexcept { val_ = std::move(new_val_); return *this; }
+
+            // If you suspect that a type of yours is susceptible to accidental 
+			// assignment-to-temporary (like our vec is), consider deleting the 
+			// rvalue ref-qualified assignments
+			type& operator = (T&& new_val_) && noexcept = delete ;
+			type& operator = (T const& new_val_) && noexcept = delete ;
 
 			//to convert or assign from T is allowed
 			// by copying
 			nothing_but(T const& t_) noexcept : val_(t_) { }
-			type& operator = (T const& new_val_) noexcept { val_ = new_val_; return *this; }
+			type& operator = (T const& new_val_) & noexcept { val_ = new_val_; return *this; }
 
 			/* to construct from X is banned */
 			// template< typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0>
