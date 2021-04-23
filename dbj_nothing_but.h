@@ -16,7 +16,7 @@ namespace dbj {
 	namespace util {
 		using namespace std;
 
-#define DBJ_UTIL_NOTHING_BUT_VERSION "0.56.0"
+#define DBJ_UTIL_NOTHING_BUT_VERSION "0.6.0"
 
 		/*
 		On C++ types, start from here:
