@@ -23,6 +23,7 @@ In here we basically make some type coercion warnings into errors.
 For less drastic measures please see here:
 https://docs.microsoft.com/en-us/cpp/preprocessor/compiler-warnings-that-are-off-by-default?view=msvc-160
 
+This header is for when using cl.exe and clang-cl.exe. 
 */
 
 #ifdef _MSC_VER 
