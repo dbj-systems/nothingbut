@@ -18,7 +18,7 @@ namespace dbj
 	{
 		using namespace std;
 
-#define DBJ_UTIL_NOTHING_BUT_VERSION "0.6.0"
+#define DBJ_UTIL_NOTHING_BUT_VERSION "0.6.0 SIMPLE BRANCH"
 
 		/*
 		On C++ types, start from here:
@@ -88,7 +88,7 @@ namespace dbj
 			// https://howardhinnant.github.io/classdecl.html
 			// not mentioning special members makes them "default"
 			 // remember: here we handle arithmetics only
-#if 1		   
+
 			nothing_but() = default;
 			~nothing_but() = default;
 
@@ -97,7 +97,6 @@ namespace dbj
 
 			nothing_but(T&& t_) noexcept : val_(t_) {}
 			// type& operator=(T&& new_val_) noexcept { val_ = new_val_; return *this; }
-#endif // 0		   
 
 			// assignment-to-temporary is banned
 			type& operator=(T&& new_val_) && noexcept = delete;
@@ -112,10 +111,8 @@ namespace dbj
 			// (accidental) conversion to X is banned 
 			template <typename X> operator X& () = delete;
 
-			// conversion to T& -- but only if not const
-			// conversion operators are considered a bad idea
+			// conversion operators are a bad idea
 			operator T& () & = delete;
-			// conversion to T& -- banned on temporaries
 			operator T& () && = delete;
 
 			// as elsewhere in std
@@ -160,7 +157,7 @@ namespace dbj
 #endif
 		};
 
-	} // util
-} // dbj
+		} // util
+	} // dbj
 
-// EOF
+	// EOF
