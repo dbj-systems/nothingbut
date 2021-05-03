@@ -23,7 +23,7 @@ In here we basically make some type coercion warnings into errors.
 For less drastic measures please see here:
 https://docs.microsoft.com/en-us/cpp/preprocessor/compiler-warnings-that-are-off-by-default?view=msvc-160
 
-This header is for when using cl.exe and clang-cl.exe. 
+This header is for when using cl.exe and clang-cl.exe.
 */
 
 #ifdef _MSC_VER 
@@ -64,6 +64,7 @@ This header is for when using cl.exe and clang-cl.exe.
 
 // DO NOT allow silent truncation of double to float.
 // Silencing this warning causes some subtle bugs.
+// warning C4305: 'initializing': truncation from '__int64' to 'short'
 #pragma warning(error : 4305)  // level 1
 
 // DO NOT allow a constant to be assigned to a type that is too small.
@@ -72,6 +73,9 @@ This header is for when using cl.exe and clang-cl.exe.
 // wouldn't be a bug, making this warning into error breaks many builds today.
 #pragma warning(error : 4307)  // level 2
 
+// warning C4309: 'initializing': truncation of constant value
+#pragma warning(error : 4309) 
+
 // DO NOT allow implicit coercion from an integral type to a bool.
 // Af course this means C99 or better where _Bools is a keyword
 #pragma warning(error : 4800)  // level 3
@@ -79,6 +83,18 @@ This header is for when using cl.exe and clang-cl.exe.
 // here add you own little epiphany moments
 
 #endif  // _MSC_VER
+
+#ifdef __clang__
+	// clang does warning -Wliteral-conversion 
+	// if -W3 or above is used
+	// but we will stop that nonsense completely
+#pragma clang diagnostic error "-Wliteral-conversion"
+
+	// be aware that size_t(23.4) works because that is casting
+	// but 23.4ULL will not compile as it is not casting
+	// https://en.cppreference.com/w/cpp/language/integer_literal
+
+#endif // __clang__
 
 #endif // !DBJ_EPIPHANY_INC_
 

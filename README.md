@@ -1,5 +1,10 @@
 # nothing_but&lt;T&gt;
 
+> The C++ standard allows the implicit conversion between any two integer types, regardless of their values.
+>
+> Compiler warnings are unrelated to the code being legal; the compiler just warns you when your code probably does not do what you wanted it to.
+>
+> If you (or your paymaster) think that is (very) bad, this header might be your saviour.
 
 - For the prose please see the article on the blog
   - https://dbj.org/cpp-how-to-avoid-implicit-conversions/

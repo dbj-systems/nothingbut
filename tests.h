@@ -15,6 +15,7 @@ This is tested in such a environment
 */
 
 #include "dbj_nothing_but.h"
+#include "epiphany.h"
 
 #include <array>
 #include <vector>
@@ -69,17 +70,20 @@ inline auto mover = [](auto arg_) noexcept
 // Safe SiZE
 using safe_size = dbj::util::nothing_but< size_t >;
 // Safe u char
-using unsigned_char_type = dbj::util::nothing_but < unsigned char >;
+using unsigned_char_safe_type = dbj::util::nothing_but < unsigned char >;
 // safe u char buffer
-using uc_buffer_type = std::vector<unsigned_char_type>;
+using uc_buffer_type = std::vector<unsigned_char_safe_type>;
 
 /* safe buffer does not allow mixing singed and unsigned char's */
 static uc_buffer_type uc_buffer(safe_size  sz_) noexcept
 {
-	// create vector of sz length filled with '?'
+	auto question_mk = unsigned_char_safe_type::value_type('?');
+	// create vector of safe size sz length filled with '?'
+	unsigned_char_safe_type  question_mark = { question_mk };
+
 	return uc_buffer_type(
-		safe_size::value_type(sz_),
-		unsigned_char_type::value_type('?')
+		safe_size::value_type(sz_.data()),
+		question_mk
 	);
 };
 
@@ -95,11 +99,23 @@ inline void test_comparators() noexcept
 
 	// this should provoke a build warning
 	// this is getting the data out 
-	safe_size::value_type sze = s1;
+	safe_size::value_type sze = s1.data();
 
 	// clang does -Wliteral-conversion here
-	// but only if -W3 or above is used
-	sze = 23.4;
+	// if -W3 or above is used
+	// but we will stop that nonsense
+#pragma clang diagnostic error "-Wliteral-conversion"
+// ditto
+// no can do:	sze = 23.4f;
+// no can do:	sze = 23.4 ;
+// yes can do:	
+// of course this is casting from double to size_t aka unsigned long long
+	// so be aware of that
+	// and nothing_but<T> makes you aware of that too
+	sze = size_t(23.4);
+	// no can do:	sze = 23.4U ;
+	sze = 23U;
+	sze = 23ULL;
 
 	float  f{ float(1.2) };
 	double d{ double(3.4) };
@@ -125,10 +141,10 @@ inline void test_vector_walk() noexcept {
 		// since this is safe buffer of u chars 
 		// we need to take care so that we
 		// pass u char and notthing but u char
-		buffy_[walker] = unsigned_char_type::value_type(
-			safe_size::value_type(65 + ((counter_++) % 25))
+		buffy_[walker.data()] = unsigned_char_safe_type::value_type(
+			safe_size::value_type(65 + ((counter_.data()++) % 25))
 		);
-		walker++;
+		walker.data()++;
 	}
 
 	printf("\n{");
@@ -138,8 +154,8 @@ inline void test_vector_walk() noexcept {
 	{
 		// this is where T& nothing_but<T>::operator()
 		// comes handy
-		printf(" %c ", char(buffy_[walker].data()));
-		walker++;
+		printf(" %c ", char(buffy_[walker.data()].data()));
+		walker.data()++;
 	}
 	printf("}\n");
 }
