@@ -30,7 +30,7 @@ namespace dbj
 		ROADMAP: will be using requirements with C++20
 		*/
 #if 0
-		/* unused in the simple branch as we handle only aithmetic types */
+		/* unused in the simple branch as we handle only arithmetic types */
 		template< class T >
 		struct is_handled_by_nothing_but
 			: std::integral_constant<
