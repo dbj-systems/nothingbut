@@ -84,11 +84,11 @@ namespace dbj {
 			nothing_but(T&& t_) noexcept : val_(std::move(t_)) { }
 			type& operator = (T&& new_val_) & noexcept { val_ = std::move(new_val_); return *this; }
 
-            // If you suspect that a type of yours is susceptible to accidental 
+			// If you suspect that a type of yours is susceptible to accidental 
 			// assignment-to-temporary (like our vec is), consider deleting the 
 			// rvalue ref-qualified assignments
-			type& operator = (T&& new_val_) && noexcept = delete ;
-			type& operator = (T const& new_val_) && noexcept = delete ;
+			type& operator = (T&& new_val_) && noexcept = delete;
+			type& operator = (T const& new_val_) && noexcept = delete;
 
 			//to convert or assign from T is allowed
 			// by copying
@@ -104,9 +104,9 @@ namespace dbj {
 			template< typename X> type& operator = (X const& new_val_) = delete;
 
 			// conversion to T& -- but only if not const
-			operator T& () & { return val_; }
+			operator T& ()& { return val_; }
 			// conversion to T& -- banned on temporaryes
-			operator T& () && = delete ;
+			operator T& () && = delete;
 
 			/* conversion to X is banned */
 			// template<typename X, std::enable_if_t<false == std::is_same_v<T, X>, int> = 0 >
@@ -115,14 +115,14 @@ namespace dbj {
 
 			// as elsewhere in std 
 			// the convention is to provide 'data()' method
-			T const& data() const &  { return val_; }
+			T const& data() const& { return val_; }
 			// can not get data from temporary 
-			T const& data() const && = delete ;
+			T const& data() const&& = delete;
 			// for users to reach to non const data handled
 			// ref. qualified since 0.6.0
-			T& data() &  { return (T&)val_; }
+			T& data()& { return (T&)val_; }
 			// can not get data from temporary 
-			T& data() && = delete ;
+			T& data() && = delete;
 
 
 		private:

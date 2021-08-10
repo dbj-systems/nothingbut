@@ -1,8 +1,4 @@
-## Contributing
-
-This is part of a larger project `dbj-systems/dbj-laboratorium` but not let that disturb you.
-
-#### Ways to Contribute
+# Contributing
 
 No contribution is too big or too small. We are
 always happy to see users participating.
@@ -23,7 +19,7 @@ Enjoy the standard C++
 
 </hr>
 
- &copy; 2019 by
+ > &copy; 2019 - 2021 by
 
 [![dbj();](http://dbj.org/wp-content/uploads/2015/12/cropped-dbj-icon-e1486129719897.jpg)](http://www.dbj.org "dbj")  
 
