@@ -1,12 +1,19 @@
+#ifndef TESTING_INC_
+#define TESTING_INC_
+
 #if __clang__
 #pragma clang diagnostic ignored "-Wpragma-once-outside-header"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif // clang
 
-#pragma once
+
 
 /*
 Testing the Type Handle to Avoid Implicit Conversions in standard C++
+
+ By "testing" in this context we basically mean: "does it or does it not compile"
+ So we do not use any "testing framework"
+
 Firmware, drivers, avionics, medical machines, and simillar projects
 very likely do not use C++ streams, RTTI, exceptions and such
 This is tested in such a environment
@@ -22,11 +29,6 @@ This is tested in such a environment
 #include <inttypes.h>
 #include <cassert>
 #include <type_traits>
-
-/*
- By "testing" in this context we basically mean: "does it or does it not compile"
- So we do not use any "testing framework"
-*/
 
 #ifdef _WIN32
 #pragma warning( push )
@@ -97,8 +99,16 @@ inline void test_comparators() noexcept
 	// this is getting the data out 
 	safe_size::value_type sze = s1;
 
-	// clang does -Wliteral-conversion here
-	// but only if -W3 or above is used
+	/*
+	bellow produces a warning, as we are not using safe_size services
+
+	clang does -Wliteral-conversion here, but only if -W3 or above is used
+
+	message is
+
+	warning : implicit conversion from 'double' to 'safe_size::value_type'
+	(aka 'unsigned long long') changes value from 23.4 to 23 [-Wliteral-conversion]
+	*/
 	sze = 23.4;
 
 	float  f{ float(1.2) };
@@ -133,12 +143,9 @@ inline void test_vector_walk() noexcept {
 
 	printf("\n{");
 	// print the vector
-	walker = safe_size(safe_size::value_type(0));
-	while (walker < safe_size(buffy_.size()))
+	for (auto&& elem_ : buffy_)
 	{
-		// this is where T& nothing_but<T>::operator()
-		// comes handy
-		printf(" %c ", char(buffy_[walker].data()));
+		printf(" %c ", elem_.data());
 		walker++;
 	}
 	printf("}\n");
@@ -155,7 +162,7 @@ noexcept
 	/*
 	Attention: T and dbj::remove_cvr_t<T>
 	might be two different types
-	we will use the latter
+	we will use them latter
 	*/
 	using TT = typename dbj::remove_cvr_t<T>;
 	using NBT = dbj::util::nothing_but<TT>;
@@ -295,66 +302,33 @@ inline void test_assignments() noexcept
 }
 /*
 -----------------------------------------------------------------------------
+receive and return ref to array of 3 NBT's made of singed or unsigned chars
 */
-template<typename T>
-inline auto native_array_filler(T(&sarr_arg)[3])
-noexcept ->T(&)[3]
+template< typename NBT >
+inline auto native_array_filler(NBT(&sarr_arg)[3])
+noexcept ->NBT(&)[3]
 {
-	typedef T nb_t;
-	typedef typename nb_t::value_type VT;
+	using VT = typename NBT::value_type;
 
-	sarr_arg[0] = nb_t(VT('9'));
-	sarr_arg[1] = nb_t(VT('8'));
-	sarr_arg[2] = nb_t(VT('7'));
+	static_assert(
+		std::is_same_v< VT, unsigned char > ||
+		std::is_same_v< VT, signed char >
+	);
 
-	return sarr_arg;
-};
-
-template<typename T>
-inline auto native_array_filler(T* (&sarr_arg)[3])
-noexcept -> T* (&)[3]
-{
-	typedef T nb_t;
-	typedef typename nb_t::value_type VT;
-
-	sarr_arg[0] = &nb_t(VT('X'));
-	sarr_arg[1] = &nb_t(VT('Y'));
-	sarr_arg[2] = &nb_t(VT('Z'));
+	sarr_arg[0] = NBT(VT('9'));
+	sarr_arg[1] = NBT(VT('8'));
+	sarr_arg[2] = NBT(VT('7'));
 
 	return sarr_arg;
 };
 
 inline void test_compatibility() noexcept
 {
-	auto filler = [](auto sarr_arg)
-	{
-		using container = decltype(sarr_arg);
-		using nothing_but = typename container::value_type;
-		using v_type = typename nothing_but::value_type;
-
-		sarr_arg[0] = nothing_but(v_type('A'));
-		sarr_arg[1] = nothing_but(v_type('B'));
-		sarr_arg[2] = nothing_but(v_type('C'));
-
-		return sarr_arg;
-	};
+	using namespace std;
 
 	auto display = [](auto arg_)
 	{
-		if constexpr (false == std::is_pointer< decltype(arg_[0]) >::value) {
-			printf("\n{ %c %c %c }",
-				arg_[0].data(),
-				arg_[1].data(),
-				arg_[2].data()
-			);
-		}
-		else {
-			printf("\n{ %c %c %c }",
-				(arg_[0])->data(),
-				(arg_[1])->data(),
-				(arg_[2])->data()
-			);
-		}
+		printf("\n{ %c %c %c }", arg_[0].data(), arg_[1].data(), arg_[2].data());
 	};
 
 	using just_signed = dbj::util::nothing_but<signed char>;
@@ -367,13 +341,28 @@ inline void test_compatibility() noexcept
 	display(native_array_filler(sarr));
 	display(native_array_filler(uarr));
 
-	just_signed* sparr[3];
-	just_unsigned* uparr[3];
+	// fill arrays and vectors of size 3
+	// made up of signed or unsigned chars
+	auto filler = [](auto sarr_arg) noexcept
+	{
+		using container = decltype(sarr_arg);
+		using nothing_but = typename container::value_type;
+		using v_type = typename nothing_but::value_type;
 
-	//display(native_array_filler(sparr));
-	// display(native_array_filler(uparr));
+		static_assert(
+			std::is_same_v< v_type, unsigned char > ||
+			std::is_same_v< v_type, signed char >
+			);
 
-	// std::array perusal
+		assert(sarr_arg.size() == 3);
+
+		sarr_arg[0] = nothing_but(v_type('A'));
+		sarr_arg[1] = nothing_but(v_type('B'));
+		sarr_arg[2] = nothing_but(v_type('C'));
+
+		return sarr_arg;
+	};
+
 	{
 		std::vector<just_signed>	std_vec(3);
 		std::array<just_signed, 3>	std_arr;
@@ -386,3 +375,5 @@ inline void test_compatibility() noexcept
 #ifdef _WIN32
 #pragma warning( pop )
 #endif
+
+#endif // TESTING_INC_
